@@ -1,7 +1,7 @@
 ---
 title: "Reading and writing HDF5 files with R"
 author: "Travis Hinkelman"
-date: "8/9/2020"
+date: "8/13/2020"
 output: ioslides_presentation
 css: styles.css
 ---
@@ -10,27 +10,36 @@ css: styles.css
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## R Markdown
+## [HDF5](https://www.hdfgroup.org/solutions/hdf5/)
 
-This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+- High performance data software library and file format
+- Manage, process, and store heterogeneous data
+- Built for fast I/O processing and storage
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+## [DSM2](https://water.ca.gov/Library/Modeling-and-Analysis/Bay-Delta-Region-models-and-tools/Delta-Simulation-Model-II)
 
-## Slide with Bullets
+- 1D mathematical model for dynamic simulation of 1D hydrodynamics, water quality, and particle tracking in a network of riverine or estuarine channels.
 
-- Bullet 1
-- Bullet 2
-- Bullet 3
+- Widely used for planning and management of the Delta
 
-## Slide with R Output
+- HDF5 is one of file formats used for DSM2 output
 
-```{r cars, echo = TRUE}
-summary(cars)
+## [rhdf5](https://www.bioconductor.org/packages/release/bioc/html/rhdf5.html)
+
+- Available through Bioconductor
+
+- Takes a dependency on [Rhdf5lib](https://www.bioconductor.org/packages/release/bioc/html/Rhdf5lib.html), which provides C and C++ HDF5 libraries
+
+```{r echo = TRUE, eval = FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("rhdf5")
 ```
 
-## Slide with Plot
-
-```{r pressure}
-plot(pressure)
+## List File Contents
+```{r echo = TRUE}
+library(rhdf5)
+path = "sjr1500_omr5000.h5"
+fc <- h5ls(path)
 ```
-
