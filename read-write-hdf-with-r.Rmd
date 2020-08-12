@@ -28,7 +28,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 - Available through Bioconductor
 
-- Takes a dependency on [Rhdf5lib](https://www.bioconductor.org/packages/release/bioc/html/Rhdf5lib.html), which provides C and C++ HDF5 libraries
+- [Rhdf5lib](https://www.bioconductor.org/packages/release/bioc/html/Rhdf5lib.html) provides C and C++ HDF5 libraries
 
 ```{r echo = TRUE, eval = FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
@@ -40,6 +40,12 @@ BiocManager::install("rhdf5")
 ## List File Contents
 ```{r echo = TRUE}
 library(rhdf5)
+
 path = "sjr1500_omr5000.h5"
-fc <- h5ls(path)
+
+head(h5ls(path), 5)
+```
+
+```{r echo = TRUE}
+unique(h5ls(path)$group)
 ```

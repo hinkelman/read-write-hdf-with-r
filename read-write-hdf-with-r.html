@@ -3150,7 +3150,7 @@ padding: 0.5em 1.5em;
 
 <ul>
 <li><p>Available through Bioconductor</p></li>
-<li><p>Takes a dependency on <a href='https://www.bioconductor.org/packages/release/bioc/html/Rhdf5lib.html' title=''>Rhdf5lib</a>, which provides C and C++ HDF5 libraries</p></li>
+<li><p><a href='https://www.bioconductor.org/packages/release/bioc/html/Rhdf5lib.html' title=''>Rhdf5lib</a> provides C and C++ HDF5 libraries</p></li>
 </ul>
 
 <pre class = 'prettyprint lang-r'>if (!requireNamespace(&quot;BiocManager&quot;, quietly = TRUE))
@@ -3158,24 +3158,25 @@ padding: 0.5em 1.5em;
 
 BiocManager::install(&quot;rhdf5&quot;)</pre>
 
-</article></slide><slide class=""><hgroup><h2>List Contents</h2></hgroup><article  id="list-contents">
+</article></slide><slide class=""><hgroup><h2>List File Contents</h2></hgroup><article  id="list-file-contents">
 
 <pre class = 'prettyprint lang-r'>library(rhdf5)
-h5ls(&quot;sjr1500_omr5000.h5&quot;)[1:12,]</pre>
 
-<pre >##              group             name       otype dclass            dim
-## 0                /            hydro   H5I_GROUP                      
-## 1           /hydro             data   H5I_GROUP                      
-## 2      /hydro/data     channel area H5I_DATASET  FLOAT 2 x 517 x 1441
-## 3      /hydro/data channel avg area H5I_DATASET  FLOAT     517 x 1441
-## 4      /hydro/data     channel flow H5I_DATASET  FLOAT 2 x 517 x 1441
-## 5      /hydro/data    channel stage H5I_DATASET  FLOAT 2 x 517 x 1441
-## 6      /hydro/data        qext flow H5I_DATASET  FLOAT     790 x 1441
-## 7      /hydro/data   reservoir flow H5I_DATASET  FLOAT      14 x 1441
-## 8      /hydro/data reservoir height H5I_DATASET  FLOAT       5 x 1441
-## 9      /hydro/data    transfer flow H5I_DATASET  FLOAT       1 x 1441
-## 10          /hydro         geometry   H5I_GROUP                      
-## 11 /hydro/geometry   channel_bottom H5I_DATASET  FLOAT        517 x 2</pre></article></slide>
+path = &quot;sjr1500_omr5000.h5&quot;
+
+head(h5ls(path), 5)</pre>
+
+<pre >##         group             name       otype dclass            dim
+## 0           /            hydro   H5I_GROUP                      
+## 1      /hydro             data   H5I_GROUP                      
+## 2 /hydro/data     channel area H5I_DATASET  FLOAT 2 x 517 x 1441
+## 3 /hydro/data channel avg area H5I_DATASET  FLOAT     517 x 1441
+## 4 /hydro/data     channel flow H5I_DATASET  FLOAT 2 x 517 x 1441</pre>
+
+<pre class = 'prettyprint lang-r'>unique(h5ls(path)$group)</pre>
+
+<pre >## [1] &quot;/&quot;               &quot;/hydro&quot;          &quot;/hydro/data&quot;     &quot;/hydro/geometry&quot;
+## [5] &quot;/hydro/input&quot;</pre></article></slide>
 
 
   <slide class="backdrop"></slide>
