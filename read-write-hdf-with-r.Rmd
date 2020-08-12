@@ -1,8 +1,9 @@
 ---
 title: "Reading and writing HDF5 files with R"
 author: "Travis Hinkelman"
-date: "8/13/2020"
+date: "2020-08-13"
 output: ioslides_presentation
+widescreen: true
 css: styles.css
 ---
 
@@ -37,15 +38,72 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install("rhdf5")
 ```
 
-## List File Contents
+## File Contents
+
 ```{r echo = TRUE}
 library(rhdf5)
 
 path = "sjr1500_omr5000.h5"
-
 head(h5ls(path), 5)
 ```
 
 ```{r echo = TRUE}
 unique(h5ls(path)$group)
 ```
+
+## Read Attributes
+
+```{r echo = TRUE}
+h5readAttributes(path, "hydro/data/channel flow")
+```
+
+## Generate Dates
+
+```{r echo = TRUE}
+hydro_attr <- h5readAttributes(path, "hydro")
+flow_attr <- h5readAttributes(path, "hydro/data/channel flow")
+
+num_int <- hydro_attr$`Number of intervals`
+time_int <- hydro_attr$`Time interval`
+start_dt <- flow_attr$start_time
+
+datetimes <- seq.POSIXt(from = as.POSIXct(start_dt, tz = "UTC"),
+                        by = paste(time_int, "mins"),
+                        length.out = num_int)
+
+head(datetimes)
+```
+
+## Read Data
+
+```{r echo = TRUE}
+h5read(path, "hydro/geometry/channel_number")[90:115]
+
+h5read(path, "hydro/geometry/channel_location")
+
+trimws(h5read(path, "hydro/geometry/channel_location"))
+```
+
+## Calculate Velocity
+
+```{r echo = TRUE}
+flow <- h5read(path, "hydro/data/channel flow")
+dim(flow)
+
+area <- h5read(path, "hydro/data/channel area")
+dim(area)
+
+velocity <- flow/area
+```
+
+## Array Dimensions
+
+- 1st dimension is channel location (1 = upstream, 2 = downstream)
+- 2nd dimension is channel number
+- 3rd dimension is interval number
+
+```{r echo = TRUE}
+velocity[1, 1:5, 1:5]
+```
+
+If you are using HDFView, indexes start at 0, not 1.

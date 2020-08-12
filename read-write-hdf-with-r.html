@@ -9,6 +9,7 @@
 
 
 
+  <meta name="date" content="2020-08-13" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3118,7 +3119,7 @@ padding: 0.5em 1.5em;
 
 <body style="opacity: 0">
 
-<slides>
+<slides class="layout-widescreen">
 
   <slide class="title-slide segue nobackground">
         <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
@@ -3126,7 +3127,7 @@ padding: 0.5em 1.5em;
       <h1 data-config-title><!-- populated from slide_config.json --></h1>
       
       <p data-config-presenter><!-- populated from slide_config.json --></p>
-            <p style="margin-top: 6px; margin-left: -2px;">8/13/2020</p>
+            <p style="margin-top: 6px; margin-left: -2px;">2020-08-13</p>
           </hgroup>
   </slide>
 
@@ -3158,12 +3159,11 @@ padding: 0.5em 1.5em;
 
 BiocManager::install(&quot;rhdf5&quot;)</pre>
 
-</article></slide><slide class=""><hgroup><h2>List File Contents</h2></hgroup><article  id="list-file-contents">
+</article></slide><slide class=""><hgroup><h2>File Contents</h2></hgroup><article  id="file-contents">
 
 <pre class = 'prettyprint lang-r'>library(rhdf5)
 
 path = &quot;sjr1500_omr5000.h5&quot;
-
 head(h5ls(path), 5)</pre>
 
 <pre >##         group             name       otype dclass            dim
@@ -3176,7 +3176,99 @@ head(h5ls(path), 5)</pre>
 <pre class = 'prettyprint lang-r'>unique(h5ls(path)$group)</pre>
 
 <pre >## [1] &quot;/&quot;               &quot;/hydro&quot;          &quot;/hydro/data&quot;     &quot;/hydro/geometry&quot;
-## [5] &quot;/hydro/input&quot;</pre></article></slide>
+## [5] &quot;/hydro/input&quot;</pre>
+
+</article></slide><slide class=""><hgroup><h2>Read Attributes</h2></hgroup><article  id="read-attributes">
+
+<pre class = 'prettyprint lang-r'>h5readAttributes(path, &quot;hydro/data/channel flow&quot;)</pre>
+
+<pre >## $CLASS
+## [1] &quot;TIMESERIES&quot;
+## 
+## $interval
+## [1] &quot;1hour&quot;
+## 
+## $model
+## [1] &quot;Hydro&quot;
+## 
+## $model_version
+## [1] &quot;8.0&quot;
+## 
+## $start_time
+## [1] &quot;2007-05-01 00:00:00&quot;</pre>
+
+</article></slide><slide class=""><hgroup><h2>Generate Dates</h2></hgroup><article  id="generate-dates">
+
+<pre class = 'prettyprint lang-r'>hydro_attr &lt;- h5readAttributes(path, &quot;hydro&quot;)
+flow_attr &lt;- h5readAttributes(path, &quot;hydro/data/channel flow&quot;)
+
+num_int &lt;- hydro_attr$`Number of intervals`
+time_int &lt;- hydro_attr$`Time interval`
+start_dt &lt;- flow_attr$start_time
+
+datetimes &lt;- seq.POSIXt(from = as.POSIXct(start_dt, tz = &quot;UTC&quot;),
+                        by = paste(time_int, &quot;mins&quot;),
+                        length.out = num_int)
+
+head(datetimes)</pre>
+
+<pre >## [1] &quot;2007-05-01 00:00:00 UTC&quot; &quot;2007-05-01 01:00:00 UTC&quot;
+## [3] &quot;2007-05-01 02:00:00 UTC&quot; &quot;2007-05-01 03:00:00 UTC&quot;
+## [5] &quot;2007-05-01 04:00:00 UTC&quot; &quot;2007-05-01 05:00:00 UTC&quot;</pre>
+
+</article></slide><slide class=""><hgroup><h2>Read Data</h2></hgroup><article  id="read-data">
+
+<pre class = 'prettyprint lang-r'>h5read(path, &quot;hydro/geometry/channel_number&quot;)[90:115]</pre>
+
+<pre >##  [1]  92  94  95  96  97 101 102 104 105 106 107 108 111 114 115 116 117 118 119
+## [20] 120 121 122 123 124 125 126</pre>
+
+<pre class = 'prettyprint lang-r'>length(h5read(path, &quot;hydro/geometry/channel_number&quot;))</pre>
+
+<pre >## [1] 517</pre>
+
+<pre class = 'prettyprint lang-r'>h5read(path, &quot;hydro/geometry/channel_location&quot;)</pre>
+
+<pre >## [1] &quot;upstream    &quot; &quot;downstream  &quot;</pre>
+
+<pre class = 'prettyprint lang-r'>trimws(h5read(path, &quot;hydro/geometry/channel_location&quot;))</pre>
+
+<pre >## [1] &quot;upstream&quot;   &quot;downstream&quot;</pre>
+
+</article></slide><slide class=""><hgroup><h2>Calculate Velocity</h2></hgroup><article  id="calculate-velocity">
+
+<pre class = 'prettyprint lang-r'>flow &lt;- h5read(path, &quot;hydro/data/channel flow&quot;)
+dim(flow)</pre>
+
+<pre >## [1]    2  517 1441</pre>
+
+<pre class = 'prettyprint lang-r'>area &lt;- h5read(path, &quot;hydro/data/channel area&quot;)
+dim(area)</pre>
+
+<pre >## [1]    2  517 1441</pre>
+
+<pre class = 'prettyprint lang-r'>velocity &lt;- flow/area</pre>
+
+</article></slide><slide class=""><hgroup><h2>Array Dimensions</h2></hgroup><article  id="array-dimensions">
+
+<ul>
+<li>1st dimension is channel location (1 = upstream, 2 = downstream)</li>
+<li>2nd dimension is channel number</li>
+<li>3rd dimension is interval number</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>velocity[1, 1:5, 1:5]</pre>
+
+<pre >##           [,1]      [,2]      [,3]      [,4]      [,5]
+## [1,] 1.1014214 0.6331637 1.1518706 1.1762191 1.1951556
+## [2,] 0.5113325 0.6001004 0.7378479 0.8640986 0.9310348
+## [3,] 0.4127500 0.8834963 0.7713770 0.8120278 0.8512217
+## [4,] 0.3297754 1.0056431 0.9916248 0.9701493 0.9796679
+## [5,] 0.1867545 0.8227022 0.7454532 0.6782244 0.6400979</pre>
+
+<ul>
+<li>If you are using HDFView, indexes start at 0, not 1.</li>
+</ul></article></slide>
 
 
   <slide class="backdrop"></slide>
