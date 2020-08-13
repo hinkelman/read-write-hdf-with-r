@@ -22,6 +22,10 @@ summary(datetimes)
 h5read(path, "hydro/geometry/channel_location")
 h5read(path, "hydro/geometry/channel_number")[90:115]
 
+flow_attr <- h5read(path, "hydro/data/channel flow", read.attributes = TRUE)
+str(flow_attr)
+attr(flow_attr, "start_time")
+
 flow <- h5read(path, "hydro/data/channel flow")
 dim(flow)
 
@@ -30,3 +34,22 @@ dim(area)
 
 velocity <- flow/area
 velocity[1, 1:5, 1:5]
+
+pre_slice <- function(dim1, dim2, dim3){
+  h5read(path, "hydro/data/channel flow", index = list(dim1, dim2, dim3))
+  h5closeAll() }
+
+post_slice <- function(dim1, dim2, dim3){
+  h5read(path, "hydro/data/channel flow")[dim1, dim2, dim3, drop = FALSE]
+  h5closeAll() }
+
+microbenchmark::microbenchmark(
+  pre_slice(1, 1:52, 1:144), 
+  post_slice(1, 1:52, 1:144),
+  pre_slice( 1:2, 1:465, 1:1297),
+  post_slice(1:2, 1:465, 1:1297),
+  pre_slice( 1, sample(1:517, 52), sample(1:1441, 144)), 
+  post_slice(1, sample(1:517, 52), sample(1:1441, 144)),
+  pre_slice( 1, sample(1:517, 104), sample(1:1441, 288)), 
+  post_slice(1, sample(1:517, 104), sample(1:1441, 288)),
+  times = 25L)

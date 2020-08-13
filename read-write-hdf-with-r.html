@@ -3223,10 +3223,6 @@ head(datetimes)</pre>
 <pre >##  [1]  92  94  95  96  97 101 102 104 105 106 107 108 111 114 115 116 117 118 119
 ## [20] 120 121 122 123 124 125 126</pre>
 
-<pre class = 'prettyprint lang-r'>length(h5read(path, &quot;hydro/geometry/channel_number&quot;))</pre>
-
-<pre >## [1] 517</pre>
-
 <pre class = 'prettyprint lang-r'>h5read(path, &quot;hydro/geometry/channel_location&quot;)</pre>
 
 <pre >## [1] &quot;upstream    &quot; &quot;downstream  &quot;</pre>
@@ -3234,6 +3230,22 @@ head(datetimes)</pre>
 <pre class = 'prettyprint lang-r'>trimws(h5read(path, &quot;hydro/geometry/channel_location&quot;))</pre>
 
 <pre >## [1] &quot;upstream&quot;   &quot;downstream&quot;</pre>
+
+</article></slide><slide class=""><hgroup><h2>Read Data</h2></hgroup><article  id="read-data-1">
+
+<pre class = 'prettyprint lang-r'>flow_attr &lt;- h5read(path, &quot;hydro/data/channel flow&quot;, read.attributes = TRUE)
+str(flow_attr)</pre>
+
+<pre >##  num [1:2, 1:517, 1:1441] 812 750 750 687 687 ...
+##  - attr(*, &quot;CLASS&quot;)= chr [1(1d)] &quot;TIMESERIES&quot;
+##  - attr(*, &quot;interval&quot;)= chr [1(1d)] &quot;1hour&quot;
+##  - attr(*, &quot;model&quot;)= chr [1(1d)] &quot;Hydro&quot;
+##  - attr(*, &quot;model_version&quot;)= chr [1(1d)] &quot;8.0&quot;
+##  - attr(*, &quot;start_time&quot;)= chr [1(1d)] &quot;2007-05-01 00:00:00&quot;</pre>
+
+<pre class = 'prettyprint lang-r'>attr(flow_attr, &quot;start_time&quot;)</pre>
+
+<pre >## [1] &quot;2007-05-01 00:00:00&quot;</pre>
 
 </article></slide><slide class=""><hgroup><h2>Calculate Velocity</h2></hgroup><article  id="calculate-velocity">
 
@@ -3266,9 +3278,41 @@ dim(area)</pre>
 ## [4,] 0.3297754 1.0056431 0.9916248 0.9701493 0.9796679
 ## [5,] 0.1867545 0.8227022 0.7454532 0.6782244 0.6400979</pre>
 
-<ul>
-<li>If you are using HDFView, indexes start at 0, not 1.</li>
-</ul></article></slide>
+<p>If you are using HDFView, indexes start at 0, not 1.</p>
+
+</article></slide><slide class=""><hgroup><h2>Read Performance</h2></hgroup><article  id="read-performance">
+
+<pre class = 'prettyprint lang-r'>pre_slice &lt;- function(dim1, dim2, dim3){
+  h5read(path, &quot;hydro/data/channel flow&quot;, index = list(dim1, dim2, dim3))
+  h5closeAll() }
+
+post_slice &lt;- function(dim1, dim2, dim3){
+  h5read(path, &quot;hydro/data/channel flow&quot;)[dim1, dim2, dim3, drop = FALSE]
+  h5closeAll() }
+
+microbenchmark::microbenchmark(
+  pre_slice(1, 1:52, 1:144), 
+  post_slice(1, 1:52, 1:144),
+  pre_slice( 1:2, 1:465, 1:1297),
+  post_slice(1:2, 1:465, 1:1297),
+  pre_slice( 1, sample(1:517, 52), sample(1:1441, 144)), 
+  post_slice(1, sample(1:517, 52), sample(1:1441, 144)),
+  pre_slice( 1, sample(1:517, 104), sample(1:1441, 288)), 
+  post_slice(1, sample(1:517, 104), sample(1:1441, 288)),
+  times = 25L)</pre>
+
+</article></slide><slide class=""><hgroup><h2>Read Performance</h2></hgroup><article  id="read-performance-1">
+
+<pre >Unit: milliseconds
+                                                   expr       min    median       max
+                              pre_slice(1, 1:52, 1:144)  15.44713  17.48160  33.19277
+                             post_slice(1, 1:52, 1:144)  82.48233  88.14472 137.34435
+                          pre_slice(1:2, 1:465, 1:1297)  77.68968  89.61094 239.75474
+                         post_slice(1:2, 1:465, 1:1297)  98.44346 110.17357 136.78327
+   pre_slice(1, sample(1:517, 52), sample(1:1441, 144)) 120.83129 134.07072 182.41477
+  post_slice(1, sample(1:517, 52), sample(1:1441, 144))  82.65552  91.79320 152.53498
+  pre_slice(1, sample(1:517, 104), sample(1:1441, 288)) 375.06928 424.33413 740.61241
+ post_slice(1, sample(1:517, 104), sample(1:1441, 288))  78.35426  89.60911 107.31904</pre></article></slide>
 
 
   <slide class="backdrop"></slide>

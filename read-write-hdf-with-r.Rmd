@@ -84,6 +84,14 @@ h5read(path, "hydro/geometry/channel_location")
 trimws(h5read(path, "hydro/geometry/channel_location"))
 ```
 
+## Read Data
+
+```{r echo = TRUE}
+flow_attr <- h5read(path, "hydro/data/channel flow", read.attributes = TRUE)
+str(flow_attr)
+attr(flow_attr, "start_time")
+```
+
 ## Calculate Velocity
 
 ```{r echo = TRUE}
@@ -107,3 +115,41 @@ velocity[1, 1:5, 1:5]
 ```
 
 If you are using HDFView, indexes start at 0, not 1.
+
+## Read Performance
+
+```{r echo = TRUE, eval = FALSE}
+pre_slice <- function(dim1, dim2, dim3){
+  h5read(path, "hydro/data/channel flow", index = list(dim1, dim2, dim3))
+  h5closeAll() }
+
+post_slice <- function(dim1, dim2, dim3){
+  h5read(path, "hydro/data/channel flow")[dim1, dim2, dim3, drop = FALSE]
+  h5closeAll() }
+
+microbenchmark::microbenchmark(
+  pre_slice(1, 1:52, 1:144), 
+  post_slice(1, 1:52, 1:144),
+  pre_slice( 1:2, 1:465, 1:1297),
+  post_slice(1:2, 1:465, 1:1297),
+  pre_slice( 1, sample(1:517, 52), sample(1:1441, 144)), 
+  post_slice(1, sample(1:517, 52), sample(1:1441, 144)),
+  pre_slice( 1, sample(1:517, 104), sample(1:1441, 288)), 
+  post_slice(1, sample(1:517, 104), sample(1:1441, 288)),
+  times = 25L)
+```
+
+## Read Performance
+
+```
+Unit: milliseconds
+                                                   expr       min    median       max
+                              pre_slice(1, 1:52, 1:144)  15.44713  17.48160  33.19277
+                             post_slice(1, 1:52, 1:144)  82.48233  88.14472 137.34435
+                          pre_slice(1:2, 1:465, 1:1297)  77.68968  89.61094 239.75474
+                         post_slice(1:2, 1:465, 1:1297)  98.44346 110.17357 136.78327
+   pre_slice(1, sample(1:517, 52), sample(1:1441, 144)) 120.83129 134.07072 182.41477
+  post_slice(1, sample(1:517, 52), sample(1:1441, 144))  82.65552  91.79320 152.53498
+  pre_slice(1, sample(1:517, 104), sample(1:1441, 288)) 375.06928 424.33413 740.61241
+ post_slice(1, sample(1:517, 104), sample(1:1441, 288))  78.35426  89.60911 107.31904
+```
