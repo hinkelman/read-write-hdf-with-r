@@ -53,3 +53,12 @@ microbenchmark::microbenchmark(
   pre_slice( 1, sample(1:517, 104), sample(1:1441, 288)), 
   post_slice(1, sample(1:517, 104), sample(1:1441, 288)),
   times = 25L)
+
+h5createFile("ex_hdf5file.h5")
+
+# write a matrix
+B = array(seq(0.1,2.0,by=0.1),dim=c(5,2,2))
+attr(B, "scale") <- "liter"
+h5write(B, "ex_hdf5file.h5","B")
+
+str(readH5("ex_hdf5file.h5","B"))

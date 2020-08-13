@@ -153,3 +153,24 @@ Unit: milliseconds
   pre_slice(1, sample(1:517, 104), sample(1:1441, 288)) 375.06928 424.33413 740.61241
  post_slice(1, sample(1:517, 104), sample(1:1441, 288))  78.35426  89.60911 107.31904
 ```
+
+## Write Data
+
+Why write HDF5 files?
+
+- Efficiently store large, complicated datasets
+- Ability to view data with GUI app (HDFView)
+- Share data between programming environments (e.g., R and Python)
+
+## Write Data
+
+```{r echo = TRUE}
+h5createFile("ex_hdf5file.h5")
+
+# write a matrix
+B = array(seq(0.1,2.0,by=0.1),dim=c(5,2,2))
+attr(B, "scale") <- "liter"
+h5write(B, "ex_hdf5file.h5","B")
+
+str(h5read("ex_hdf5file.h5","B"))
+```

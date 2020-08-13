@@ -3312,7 +3312,32 @@ microbenchmark::microbenchmark(
    pre_slice(1, sample(1:517, 52), sample(1:1441, 144)) 120.83129 134.07072 182.41477
   post_slice(1, sample(1:517, 52), sample(1:1441, 144))  82.65552  91.79320 152.53498
   pre_slice(1, sample(1:517, 104), sample(1:1441, 288)) 375.06928 424.33413 740.61241
- post_slice(1, sample(1:517, 104), sample(1:1441, 288))  78.35426  89.60911 107.31904</pre></article></slide>
+ post_slice(1, sample(1:517, 104), sample(1:1441, 288))  78.35426  89.60911 107.31904</pre>
+
+</article></slide><slide class=""><hgroup><h2>Write Data</h2></hgroup><article  id="write-data">
+
+<p>Why write HDF5 files?</p>
+
+<ul>
+<li>Efficiently store large, complicated datasets</li>
+<li>Ability to view data with GUI app (HDFView)</li>
+<li>Share data between programming environments (e.g., R and Python)</li>
+</ul>
+
+</article></slide><slide class=""><hgroup><h2>Write Data</h2></hgroup><article  id="write-data-1">
+
+<pre class = 'prettyprint lang-r'>h5createFile(&quot;ex_hdf5file.h5&quot;)</pre>
+
+<pre >## [1] TRUE</pre>
+
+<pre class = 'prettyprint lang-r'># write a matrix
+B = array(seq(0.1,2.0,by=0.1),dim=c(5,2,2))
+attr(B, &quot;scale&quot;) &lt;- &quot;liter&quot;
+h5write(B, &quot;ex_hdf5file.h5&quot;,&quot;B&quot;)
+
+str(h5read(&quot;ex_hdf5file.h5&quot;,&quot;B&quot;))</pre>
+
+<pre >##  num [1:5, 1:2, 1:2] 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1 ...</pre></article></slide>
 
 
   <slide class="backdrop"></slide>
