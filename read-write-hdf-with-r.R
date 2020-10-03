@@ -62,3 +62,5 @@ attr(B, "scale") <- "liter"
 h5write(B, "ex_hdf5file.h5","B")
 
 str(readH5("ex_hdf5file.h5","B"))
+
+
